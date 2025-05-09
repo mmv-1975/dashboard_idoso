@@ -74,10 +74,38 @@ const HomePage: React.FC = () => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        setAppData(data);
+
+        // --- INÍCIO DA MODIFICAÇÃO SUGERIDA ---
+        // Use o operador ?? para fornecer um valor padrão caso 'data.propriedade' seja null ou undefined
+        setAppData({
+            total_respondentes: data.total_respondentes ?? 0, // Assume 0 se missing
+            distribuicao_idade: data.distribuicao_idade ?? {}, // Assume objeto vazio se missing
+            distribuicao_municipio: data.distribuicao_municipio ?? {}, // Assume objeto vazio se missing
+            // Verifique se estas propriedades existem no seu data.json real ou se são apenas da interface AppData
+            // Se existirem, trate-as:
+            distribuicao_perfil: data.distribuicao_perfil ?? {},
+            distribuicao_cnh: data.distribuicao_cnh ?? {},
+            // Tratar propriedades que são arrays:
+            respostas_interesses: data.respostas_interesses ?? [], // Assume array vazio se missing
+            respostas_mensagem_gestores_transito: data.respostas_mensagem_gestores_transito ?? [], // Assume array vazio se missing
+            respostas_completas_filtragem: data.respostas_completas_filtragem ?? [], // Assume array vazio se missing
+        });
+        // --- FIM DA MODIFICAÇÃO SUGERIDA ---
+
       } catch (e: any) {
         setError(e.message);
         console.error("Erro ao carregar os dados:", e);
+        // Se houver um erro ao carregar/parsear, pode ser útil definir appData como null/empty defaults também
+        setAppData({ // Opcional: definir defaults em caso de erro de fetch/parse
+             total_respondentes: 0,
+             distribuicao_idade: {},
+             distribuicao_municipio: {},
+             distribuicao_perfil: {},
+             distribuicao_cnh: {},
+             respostas_interesses: [],
+             respostas_mensagem_gestores_transito: [],
+             respostas_completas_filtragem: [],
+         });
       } finally {
         setLoading(false);
       }
