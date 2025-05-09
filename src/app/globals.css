@@ -1,14 +1,46 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*
+  Adicione ou modifique a regra para o modo de cores forçadas aqui.
+  Substitua a regra @media (-ms-high-contrast: active) pela abaixo.
+  Copie os estilos que estavam dentro da regra antiga para dentro desta nova.
+*/
 @media (prefers-forced-colors: active) {
-  /* Os mesmos estilos específicos para alto contraste aqui */
-  selector {
-    color: windowText;
-    background-color: window;
+  /*
+    ADICIONE AQUI os estilos específicos que você tinha (ou quer ter)
+    para usuários com modos de alto contraste/cores forçadas.
+    Exemplos comuns:
+    - Definir explicitamente cores de texto e fundo para garantir visibilidade.
+    - Adicionar bordas visíveis onde o contraste normal usa apenas cor.
+    - Remover background-images que podem dificultar a leitura em alto contraste.
+  */
+
+  /* Exemplo: Definindo cor de texto e fundo para elementos importantes */
+  body {
+    background-color: window; /* Cor de fundo padrão do tema de alto contraste */
+    color: windowtext; /* Cor do texto padrão do tema de alto contraste */
   }
-  /* ... outros estilos ... */
+
+  /* Exemplo: Garantir que links sejam sublinhados, pois a cor pode sumir */
+  a {
+    text-decoration: underline;
+    color: linktext; /* Cor de link padrão do tema de alto contraste */
+  }
+
+  /* Exemplo: Adicionar borda em inputs se eles não tiverem fundo */
+  input, button, select, textarea {
+    border: 1px solid buttonborder; /* Borda padrão de botão/input do tema */
+  }
+
+  /*
+    Continue adicionando seletores e estilos conforme a necessidade
+    para garantir que sua UI seja clara e utilizável em modo de cores forçadas.
+  */
 }
+
+/* Outros estilos customizados da sua aplicação... */
 
 body {
   font-family: Arial, Helvetica, sans-serif;
