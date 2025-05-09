@@ -1,10 +1,30 @@
-import React from 'react';
+
+'use client';
+
+import React, { useEffect, useState } from 'react';
 import DashboardLayout from '@/components/DashboardLayout';
-import data from '/home/ubuntu/dashboard_idoso/public/data.json'; // Ajuste o caminho se necessário
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import WordCloud from 'react-wordcloud';
 
-// Tipagem para os dados (simplificada, ajuste conforme a estrutura real do seu data.json)
+// Tipagem para os dados (ajuste conforme a estrutura real do seu data.json)
+interface AppData {
+  total_respondentes: number;
+  distribuicao_idade: Record<string, number>;
+  distribuicao_municipio: Record<string, number>;
+  distribuicao_perfil: Record<string, number>;
+  distribuicao_cnh: Record<string, number>;
+  respostas_interesses: string[];
+  respostas_mensagem_gestores_transito: string[];
+  respostas_completas_filtragem: Array<{
+    municipio: string;
+    idade: string;
+    perfil: string;
+    cnh: string;
+    interesse_curso_transito: string;
+    [key: string]: any; // Para outras chaves dinâmicas
+  }>;
+}
+
 interface ChartData {
   name: string;
   value: number;
@@ -28,8 +48,7 @@ const transformDataForWordCloud = (textArray: string[] | undefined): WordCloudDa
   if (!textArray) return [];
   const frequencyMap: Record<string, number> = {};
   textArray.forEach(text => {
-    // Tratamento básico de palavras, pode ser mais elaborado
-    const words = text.toLowerCase().split(/[\s,.;!?-]+/);
+    const words = String(text).toLowerCase().split(/[\s,.;!?-]+/);
     words.forEach(word => {
       if (word && word.length > 2) { // Ignora palavras curtas e vazias
         frequencyMap[word] = (frequencyMap[word] || 0) + 1;
@@ -40,27 +59,49 @@ const transformDataForWordCloud = (textArray: string[] | undefined): WordCloudDa
 };
 
 const HomePage: React.FC = () => {
-  // Dados para os gráficos (exemplos, use os dados reais do seu JSON)
-  const distribuicaoIdadeData = transformDataForChart(data.distribuicao_idade);
-  const distribuicaoMunicipioData = transformDataForChart(data.distribuicao_municipio);
-  const distribuicaoPerfilData = transformDataForChart(data.distribuicao_perfil);
-  const distribuicaoCnhData = transformDataForChart(data.distribuicao_cnh);
-  const interessesWordCloudData = transformDataForWordCloud(data.respostas_interesses);
-  const mensagensGestoresWordCloudData = transformDataForWordCloud(data.respostas_mensagem_gestores_transito);
+  const [appData, setAppData] = useState<AppData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   const [selectedMunicipio, setSelectedMunicipio] = React.useState<string>("Todos");
   const [selectedIdade, setSelectedIdade] = React.useState<string>("Todos");
 
-  const municipiosUnicos = ["Todos", ...new Set(data.respostas_completas_filtragem.map(item => item.municipio))];
-  const idadesUnicas = ["Todos", ...new Set(data.respostas_completas_filtragem.map(item => item.idade))];
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await fetch('/data.json'); // Carrega da pasta public
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setAppData(data);
+      } catch (e: any) {
+        setError(e.message);
+        console.error("Erro ao carregar os dados:", e);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
-  const filteredData = data.respostas_completas_filtragem.filter(item => 
+  if (loading) {
+    return <DashboardLayout><div className="flex justify-center items-center h-screen"><p className="text-2xl">Carregando dados...</p></div></DashboardLayout>;
+  }
+
+  if (error || !appData) {
+    return <DashboardLayout><div className="flex justify-center items-center h-screen"><p className="text-2xl text-red-500">Erro ao carregar dados: {error || 'Dados não encontrados.'}</p></div></DashboardLayout>;
+  }
+  
+  const municipiosUnicos = ["Todos", ...new Set(appData.respostas_completas_filtragem.map(item => item.municipio))];
+  const idadesUnicas = ["Todos", ...new Set(appData.respostas_completas_filtragem.map(item => item.idade))];
+
+  const filteredData = appData.respostas_completas_filtragem.filter(item => 
     (selectedMunicipio === "Todos" || item.municipio === selectedMunicipio) &&
     (selectedIdade === "Todos" || item.idade === selectedIdade)
   );
 
-  // Recalcular dados para gráficos com base nos filtros
-  const recalculateChartData = (key: keyof typeof data.respostas_completas_filtragem[0]) => {
+  const recalculateChartData = (key: keyof typeof appData.respostas_completas_filtragem[0]) => {
     const counts: Record<string, number> = {};
     filteredData.forEach(item => {
       const value = item[key] as string;
@@ -69,6 +110,11 @@ const HomePage: React.FC = () => {
     return transformDataForChart(counts);
   };
 
+  const distribuicaoIdadeData = transformDataForChart(appData.distribuicao_idade);
+  const distribuicaoMunicipioData = transformDataForChart(appData.distribuicao_municipio);
+  const interessesWordCloudData = transformDataForWordCloud(appData.respostas_interesses);
+  const mensagensGestoresWordCloudData = transformDataForWordCloud(appData.respostas_mensagem_gestores_transito);
+  
   const filteredDistribuicaoPerfilData = recalculateChartData('perfil');
   const filteredDistribuicaoCnhData = recalculateChartData('cnh');
   const filteredInteresseCursoData = recalculateChartData('interesse_curso_transito');
@@ -85,7 +131,7 @@ const HomePage: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-xl font-semibold mb-2 text-blue-600">Total de Respondentes</h3>
-          <p className="text-4xl font-bold">{data.total_respondentes}</p>
+          <p className="text-4xl font-bold">{appData.total_respondentes}</p>
         </div>
         <div className="bg-white p-4 rounded-lg shadow">
           <label htmlFor="municipio-filter" className="block text-sm font-medium text-gray-700 mb-1">Filtrar por Município:</label>
@@ -112,11 +158,10 @@ const HomePage: React.FC = () => {
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Visão Geral */} 
         <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Distribuição por Idade</h3>
           <ResponsiveContainer width="100%" height={300}>
-            <BarChart data={transformDataForChart(data.distribuicao_idade)} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+            <BarChart data={distribuicaoIdadeData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
               <YAxis />
@@ -156,7 +201,6 @@ const HomePage: React.FC = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Mobilidade e Transporte */}
         <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Posse de CNH (Filtrado)</h3>
           <ResponsiveContainer width="100%" height={300}>
@@ -172,7 +216,6 @@ const HomePage: React.FC = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Interesses e Educação no Trânsito */}
         <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Interesse em Curso de Trânsito (Filtrado)</h3>
            <ResponsiveContainer width="100%" height={300}>
@@ -194,7 +237,6 @@ const HomePage: React.FC = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* Mensagens aos Gestores */}
         <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-3">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Mensagens aos Gestores (Nuvem de Palavras - Geral)</h3>
           <ResponsiveContainer width="100%" height={400}>
