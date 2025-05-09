@@ -17,7 +17,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </main>
       <footer className="bg-white shadow-md mt-auto">
         <div className="container mx-auto px-6 py-4 text-center text-gray-600">
-          <p>&copy; {new Date().getFullYear()} - Desenvolvido por Manus</p>
+          <p>&copy; {new Date().getFullYear()} - Desenvolvido por Maiquel</p>
         </div>
       </footer>
     </div>
