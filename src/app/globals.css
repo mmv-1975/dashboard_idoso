@@ -1,6 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@media (forced-colors: active) {};
+@media (forced-colors: active) and (prefers-color-scheme: light) {};
+@media (forced-colors: active) and (prefers-color-scheme: dark) {};
 
 body {
   font-family: Arial, Helvetica, sans-serif;
