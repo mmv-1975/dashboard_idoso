@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -6,7 +5,17 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import WordCloud from 'react-wordcloud';
 
-// Tipagem para os dados (ajuste conforme a estrutura real do seu data.json)
+// Tipo para um item individual da lista de respostas completas
+interface RespostaCompletaItem {
+  municipio: string;
+  idade: string;
+  perfil: string;
+  cnh: string;
+  interesse_curso_transito: string;
+  [key: string]: any; // Para outras chaves dinâmicas
+}
+
+// Tipagem para os dados da aplicação
 interface AppData {
   total_respondentes: number;
   distribuicao_idade: Record<string, number>;
@@ -15,14 +24,7 @@ interface AppData {
   distribuicao_cnh: Record<string, number>;
   respostas_interesses: string[];
   respostas_mensagem_gestores_transito: string[];
-  respostas_completas_filtragem: Array<{
-    municipio: string;
-    idade: string;
-    perfil: string;
-    cnh: string;
-    interesse_curso_transito: string;
-    [key: string]: any; // Para outras chaves dinâmicas
-  }>;
+  respostas_completas_filtragem: Array<RespostaCompletaItem>;
 }
 
 interface ChartData {
@@ -37,23 +39,23 @@ interface WordCloudData {
 
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
-// Função para transformar dados de contagem em formato para Recharts
 const transformDataForChart = (dataObject: Record<string, number> | undefined): ChartData[] => {
   if (!dataObject) return [];
   return Object.entries(dataObject).map(([name, value]) => ({ name, value }));
 };
 
-// Função para transformar dados de texto para WordCloud
 const transformDataForWordCloud = (textArray: string[] | undefined): WordCloudData[] => {
-  if (!textArray) return [];
+  if (!textArray || textArray.length === 0) return [];
   const frequencyMap: Record<string, number> = {};
   textArray.forEach(text => {
-    const words = String(text).toLowerCase().split(/[\s,.;!?-]+/);
-    words.forEach(word => {
-      if (word && word.length > 2) { // Ignora palavras curtas e vazias
-        frequencyMap[word] = (frequencyMap[word] || 0) + 1;
-      }
-    });
+    if (typeof text === 'string') { // Adicionada verificação de tipo
+      const words = text.toLowerCase().split(/[\s,.;!?-]+/);
+      words.forEach(word => {
+        if (word && word.length > 2) {
+          frequencyMap[word] = (frequencyMap[word] || 0) + 1;
+        }
+      });
+    }
   });
   return Object.entries(frequencyMap).map(([text, value]) => ({ text, value }));
 };
@@ -69,34 +71,25 @@ const HomePage: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await fetch('/data.json'); // Carrega da pasta public
+        const response = await fetch('/data.json');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-
-        // --- INÍCIO DA MODIFICAÇÃO SUGERIDA ---
-        // Use o operador ?? para fornecer um valor padrão caso 'data.propriedade' seja null ou undefined
         setAppData({
-            total_respondentes: data.total_respondentes ?? 0, // Assume 0 se missing
-            distribuicao_idade: data.distribuicao_idade ?? {}, // Assume objeto vazio se missing
-            distribuicao_municipio: data.distribuicao_municipio ?? {}, // Assume objeto vazio se missing
-            // Verifique se estas propriedades existem no seu data.json real ou se são apenas da interface AppData
-            // Se existirem, trate-as:
+            total_respondentes: data.total_respondentes ?? 0,
+            distribuicao_idade: data.distribuicao_idade ?? {},
+            distribuicao_municipio: data.distribuicao_municipio ?? {},
             distribuicao_perfil: data.distribuicao_perfil ?? {},
             distribuicao_cnh: data.distribuicao_cnh ?? {},
-            // Tratar propriedades que são arrays:
-            respostas_interesses: data.respostas_interesses ?? [], // Assume array vazio se missing
-            respostas_mensagem_gestores_transito: data.respostas_mensagem_gestores_transito ?? [], // Assume array vazio se missing
-            respostas_completas_filtragem: data.respostas_completas_filtragem ?? [], // Assume array vazio se missing
+            respostas_interesses: data.respostas_interesses ?? [],
+            respostas_mensagem_gestores_transito: data.respostas_mensagem_gestores_transito ?? [],
+            respostas_completas_filtragem: data.respostas_completas_filtragem ?? [],
         });
-        // --- FIM DA MODIFICAÇÃO SUGERIDA ---
-
       } catch (e: any) {
         setError(e.message);
         console.error("Erro ao carregar os dados:", e);
-        // Se houver um erro ao carregar/parsear, pode ser útil definir appData como null/empty defaults também
-        setAppData({ // Opcional: definir defaults em caso de erro de fetch/parse
+        setAppData({
              total_respondentes: 0,
              distribuicao_idade: {},
              distribuicao_municipio: {},
@@ -121,20 +114,32 @@ const HomePage: React.FC = () => {
     return <DashboardLayout><div className="flex justify-center items-center h-screen"><p className="text-2xl text-red-500">Erro ao carregar dados: {error || 'Dados não encontrados.'}</p></div></DashboardLayout>;
   }
   
-  const municipiosUnicos = ["Todos", ...new Set(appData.respostas_completas_filtragem.map(item => item.municipio))];
-  const idadesUnicas = ["Todos", ...new Set(appData.respostas_completas_filtragem.map(item => item.idade))];
+  const municipiosUnicos = appData.respostas_completas_filtragem && appData.respostas_completas_filtragem.length > 0
+    ? ["Todos", ...new Set(appData.respostas_completas_filtragem.map(item => item.municipio).filter(m => m != null))]
+    : ["Todos"];
 
-  const filteredData = appData.respostas_completas_filtragem.filter(item => 
-    (selectedMunicipio === "Todos" || item.municipio === selectedMunicipio) &&
-    (selectedIdade === "Todos" || item.idade === selectedIdade)
-  );
+  const idadesUnicas = appData.respostas_completas_filtragem && appData.respostas_completas_filtragem.length > 0
+    ? ["Todos", ...new Set(appData.respostas_completas_filtragem.map(item => item.idade).filter(i => i != null))]
+    : ["Todos"];
 
-  const recalculateChartData = (key: keyof typeof appData.respostas_completas_filtragem[0]) => {
+  const filteredData = appData.respostas_completas_filtragem && appData.respostas_completas_filtragem.length > 0
+    ? appData.respostas_completas_filtragem.filter(item =>
+      (selectedMunicipio === "Todos" || item.municipio === selectedMunicipio) &&
+      (selectedIdade === "Todos" || item.idade === selectedIdade)
+    )
+    : [];
+
+  // CORREÇÃO APLICADA AQUI na tipagem do parâmetro 'key'
+  const recalculateChartData = (key: keyof RespostaCompletaItem) => {
     const counts: Record<string, number> = {};
-    filteredData.forEach(item => {
-      const value = item[key] as string;
-      counts[value] = (counts[value] || 0) + 1;
-    });
+    if (filteredData && filteredData.length > 0) {
+        filteredData.forEach(item => {
+            if (item && typeof item[key] !== 'undefined' && item[key] !== null) { // Verificação adicional
+                const value = String(item[key]); // Garante que é string
+                counts[value] = (counts[value] || 0) + 1;
+            }
+        });
+    }
     return transformDataForChart(counts);
   };
 
@@ -156,6 +161,7 @@ const HomePage: React.FC = () => {
 
   return (
     <DashboardLayout>
+      {/* ... O restante do JSX permanece o mesmo ... */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-xl font-semibold mb-2 text-blue-600">Total de Respondentes</h3>
@@ -278,4 +284,3 @@ const HomePage: React.FC = () => {
 };
 
 export default HomePage;
-
