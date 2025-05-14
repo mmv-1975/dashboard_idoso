@@ -267,7 +267,7 @@ const HomePage: React.FC = () => {
           </ResponsiveContainer>
         </div>
 
-        {/* CORREÇÃO APLICADA AQUI: Renderização condicional para WordCloud */}
+        {/* CORREÇÃO APLICADA AQUI: Renderização condicional para WordCloud
         {interessesWordCloudData && interessesWordCloudData.length > 0 && (
           <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2">
             <h3 className="text-xl font-semibold mb-4 text-blue-600">Principais Interesses (Geral)</h3>
@@ -275,9 +275,9 @@ const HomePage: React.FC = () => {
               <WordCloud words={interessesWordCloudData} options={options} />
             </ResponsiveContainer>
           </div>
-        )}
+        )}*/}
 
-        {/* CORREÇÃO APLICADA AQUI: Renderização condicional para WordCloud */}
+        {/* CORREÇÃO APLICADA AQUI: Renderização condicional para WordCloud 
         {mensagensGestoresWordCloudData && mensagensGestoresWordCloudData.length > 0 && (
           <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-3">
             <h3 className="text-xl font-semibold mb-4 text-blue-600">Mensagens aos Gestores (Nuvem de Palavras - Geral)</h3>
@@ -285,7 +285,7 @@ const HomePage: React.FC = () => {
               <WordCloud words={mensagensGestoresWordCloudData} options={{...options, fontSizes: [14, 40]}} />
             </ResponsiveContainer>
           </div>
-        )}
+        )}*/}
 
       </div>
     </DashboardLayout>
