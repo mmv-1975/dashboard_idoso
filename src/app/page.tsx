@@ -1,4 +1,5 @@
-// page_corrigido_v3.tsx
+// page_corrigido_v4.tsx
+// Correção: Renderização condicional para WordCloud
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -69,15 +70,14 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true); // Garante que loading é true no início de cada fetch
-      setError(null); // Limpa erros anteriores
+      setLoading(true);
+      setError(null);
       try {
         const response = await fetch('/data.json');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
-        // Aplicando valores padrão robustos para todas as propriedades esperadas
         setAppData({
             total_respondentes: data.total_respondentes ?? 0,
             distribuicao_idade: data.distribuicao_idade ?? {},
@@ -91,7 +91,6 @@ const HomePage: React.FC = () => {
       } catch (e: any) {
         setError(e.message);
         console.error("Erro ao carregar os dados:", e);
-        // Define um estado de appData seguro em caso de erro de fetch/parse
         setAppData({
              total_respondentes: 0,
              distribuicao_idade: {},
@@ -113,13 +112,10 @@ const HomePage: React.FC = () => {
     return <DashboardLayout><div className="flex justify-center items-center h-screen"><p className="text-2xl">Carregando dados...</p></div></DashboardLayout>;
   }
 
-  // Se appData for null (erro no fetch ou parse inicial), exibe erro.
-  // Não prossegue se appData for null para evitar erros de 'cannot read property of null'
   if (error || !appData) {
     return <DashboardLayout><div className="flex justify-center items-center h-screen"><p className="text-2xl text-red-500">Erro ao carregar dados: {error || 'Dados não puderam ser carregados.'}</p></div></DashboardLayout>;
   }
   
-  // Verificações robustas para criação dos filtros
   const respostasFiltragem = appData.respostas_completas_filtragem || [];
 
   const municipiosUnicos = respostasFiltragem.length > 0
@@ -132,7 +128,7 @@ const HomePage: React.FC = () => {
 
   const filteredData = respostasFiltragem.length > 0
     ? respostasFiltragem.filter(item =>
-      item && // Garante que o item não é null/undefined
+      item && 
       (selectedMunicipio === "Todos" || item.municipio === selectedMunicipio) &&
       (selectedIdade === "Todos" || item.idade === selectedIdade)
     )
@@ -151,7 +147,6 @@ const HomePage: React.FC = () => {
     return transformDataForChart(counts);
   };
 
-  // Garante que os dados base para gráficos também usem os valores de appData (que já têm defaults)
   const distribuicaoIdadeData = transformDataForChart(appData.distribuicao_idade);
   const distribuicaoMunicipioData = transformDataForChart(appData.distribuicao_municipio);
   const interessesWordCloudData = transformDataForWordCloud(appData.respostas_interesses);
@@ -271,22 +266,26 @@ const HomePage: React.FC = () => {
             </BarChart>
           </ResponsiveContainer>
         </div>
-        
-        {/*Esse é problema
-        <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2">
-          <h3 className="text-xl font-semibold mb-4 text-blue-600">Principais Interesses (Geral)</h3>
-          <ResponsiveContainer width="100%" height={300}>
-            <WordCloud words={interessesWordCloudData} options={options} />
-          </ResponsiveContainer>
-        </div>*/}
 
-        {/*Esse é problema
-        <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-3">
-          <h3 className="text-xl font-semibold mb-4 text-blue-600">Mensagens aos Gestores (Nuvem de Palavras - Geral)</h3>
-          <ResponsiveContainer width="100%" height={400}>
-             <WordCloud words={mensagensGestoresWordCloudData} options={{...options, fontSizes: [14, 40]}} />
-          </ResponsiveContainer>
-        </div>*/}
+        {/* CORREÇÃO APLICADA AQUI: Renderização condicional para WordCloud */}
+        {interessesWordCloudData && interessesWordCloudData.length > 0 && (
+          <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2">
+            <h3 className="text-xl font-semibold mb-4 text-blue-600">Principais Interesses (Geral)</h3>
+            <ResponsiveContainer width="100%" height={300}>
+              <WordCloud words={interessesWordCloudData} options={options} />
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        {/* CORREÇÃO APLICADA AQUI: Renderização condicional para WordCloud */}
+        {mensagensGestoresWordCloudData && mensagensGestoresWordCloudData.length > 0 && (
+          <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-3">
+            <h3 className="text-xl font-semibold mb-4 text-blue-600">Mensagens aos Gestores (Nuvem de Palavras - Geral)</h3>
+            <ResponsiveContainer width="100%" height={400}>
+              <WordCloud words={mensagensGestoresWordCloudData} options={{...options, fontSizes: [14, 40]}} />
+            </ResponsiveContainer>
+          </div>
+        )}
 
       </div>
     </DashboardLayout>
