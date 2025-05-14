@@ -282,12 +282,12 @@ const HomePage: React.FC = () => {
           </ResponsiveContainer>
         </div>
 
-        {/*<div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-3">
+        <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-3">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Mensagens aos Gestores (Nuvem de Palavras - Geral)</h3>
           <ResponsiveContainer width="100%" height={400}>
              <WordCloud words={mensagensGestoresWordCloudData} options={{...options, fontSizes: [14, 40]}} />
           </ResponsiveContainer>
-        </div>*/}
+        </div>
        </div> 
     </DashboardLayout>
   );
