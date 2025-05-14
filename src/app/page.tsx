@@ -200,8 +200,8 @@ const HomePage: React.FC = () => {
         </div>
       </div>
 
-      {/*<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/*<div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Distribuição por Idade</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={distribuicaoIdadeData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -213,7 +213,7 @@ const HomePage: React.FC = () => {
               <Bar dataKey="value" fill="#8884d8" name="Quantidade" />
             </BarChart>
           </ResponsiveContainer>
-        </div>*/}
+        </div>
 
         {/*<div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Distribuição por Município (Geral)</h3>
@@ -286,6 +286,7 @@ const HomePage: React.FC = () => {
              <WordCloud words={mensagensGestoresWordCloudData} options={{...options, fontSizes: [14, 40]}} />
           </ResponsiveContainer>
         </div>*/}
+       </div> 
     </DashboardLayout>
   );
 };
