@@ -1,3 +1,4 @@
+// page_corrigido_v3.tsx
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -5,17 +6,15 @@ import DashboardLayout from '@/components/DashboardLayout';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import WordCloud from 'react-wordcloud';
 
-// Tipo para um item individual da lista de respostas completas
 interface RespostaCompletaItem {
   municipio: string;
   idade: string;
   perfil: string;
   cnh: string;
   interesse_curso_transito: string;
-  [key: string]: any; // Para outras chaves dinâmicas
+  [key: string]: any;
 }
 
-// Tipagem para os dados da aplicação
 interface AppData {
   total_respondentes: number;
   distribuicao_idade: Record<string, number>;
@@ -40,7 +39,7 @@ interface WordCloudData {
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D'];
 
 const transformDataForChart = (dataObject: Record<string, number> | undefined): ChartData[] => {
-  if (!dataObject) return [];
+  if (!dataObject || Object.keys(dataObject).length === 0) return [];
   return Object.entries(dataObject).map(([name, value]) => ({ name, value }));
 };
 
@@ -48,7 +47,7 @@ const transformDataForWordCloud = (textArray: string[] | undefined): WordCloudDa
   if (!textArray || textArray.length === 0) return [];
   const frequencyMap: Record<string, number> = {};
   textArray.forEach(text => {
-    if (typeof text === 'string') { // Adicionada verificação de tipo
+    if (typeof text === 'string') {
       const words = text.toLowerCase().split(/[\s,.;!?-]+/);
       words.forEach(word => {
         if (word && word.length > 2) {
@@ -70,25 +69,29 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true); // Garante que loading é true no início de cada fetch
+      setError(null); // Limpa erros anteriores
       try {
         const response = await fetch('/data.json');
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         const data = await response.json();
+        // Aplicando valores padrão robustos para todas as propriedades esperadas
         setAppData({
             total_respondentes: data.total_respondentes ?? 0,
             distribuicao_idade: data.distribuicao_idade ?? {},
             distribuicao_municipio: data.distribuicao_municipio ?? {},
             distribuicao_perfil: data.distribuicao_perfil ?? {},
             distribuicao_cnh: data.distribuicao_cnh ?? {},
-            respostas_interesses: data.respostas_interesses ?? [],
-            respostas_mensagem_gestores_transito: data.respostas_mensagem_gestores_transito ?? [],
-            respostas_completas_filtragem: data.respostas_completas_filtragem ?? [],
+            respostas_interesses: Array.isArray(data.respostas_interesses) ? data.respostas_interesses : [],
+            respostas_mensagem_gestores_transito: Array.isArray(data.respostas_mensagem_gestores_transito) ? data.respostas_mensagem_gestores_transito : [],
+            respostas_completas_filtragem: Array.isArray(data.respostas_completas_filtragem) ? data.respostas_completas_filtragem : [],
         });
       } catch (e: any) {
         setError(e.message);
         console.error("Erro ao carregar os dados:", e);
+        // Define um estado de appData seguro em caso de erro de fetch/parse
         setAppData({
              total_respondentes: 0,
              distribuicao_idade: {},
@@ -110,32 +113,37 @@ const HomePage: React.FC = () => {
     return <DashboardLayout><div className="flex justify-center items-center h-screen"><p className="text-2xl">Carregando dados...</p></div></DashboardLayout>;
   }
 
+  // Se appData for null (erro no fetch ou parse inicial), exibe erro.
+  // Não prossegue se appData for null para evitar erros de 'cannot read property of null'
   if (error || !appData) {
-    return <DashboardLayout><div className="flex justify-center items-center h-screen"><p className="text-2xl text-red-500">Erro ao carregar dados: {error || 'Dados não encontrados.'}</p></div></DashboardLayout>;
+    return <DashboardLayout><div className="flex justify-center items-center h-screen"><p className="text-2xl text-red-500">Erro ao carregar dados: {error || 'Dados não puderam ser carregados.'}</p></div></DashboardLayout>;
   }
   
-  const municipiosUnicos = appData.respostas_completas_filtragem && appData.respostas_completas_filtragem.length > 0
-    ? ["Todos", ...new Set(appData.respostas_completas_filtragem.map(item => item.municipio).filter(m => m != null))]
+  // Verificações robustas para criação dos filtros
+  const respostasFiltragem = appData.respostas_completas_filtragem || [];
+
+  const municipiosUnicos = respostasFiltragem.length > 0
+    ? ["Todos", ...new Set(respostasFiltragem.map(item => item?.municipio).filter(m => m != null))]
     : ["Todos"];
 
-  const idadesUnicas = appData.respostas_completas_filtragem && appData.respostas_completas_filtragem.length > 0
-    ? ["Todos", ...new Set(appData.respostas_completas_filtragem.map(item => item.idade).filter(i => i != null))]
+  const idadesUnicas = respostasFiltragem.length > 0
+    ? ["Todos", ...new Set(respostasFiltragem.map(item => item?.idade).filter(i => i != null))]
     : ["Todos"];
 
-  const filteredData = appData.respostas_completas_filtragem && appData.respostas_completas_filtragem.length > 0
-    ? appData.respostas_completas_filtragem.filter(item =>
+  const filteredData = respostasFiltragem.length > 0
+    ? respostasFiltragem.filter(item =>
+      item && // Garante que o item não é null/undefined
       (selectedMunicipio === "Todos" || item.municipio === selectedMunicipio) &&
       (selectedIdade === "Todos" || item.idade === selectedIdade)
     )
     : [];
 
-  // CORREÇÃO APLICADA AQUI na tipagem do parâmetro 'key'
   const recalculateChartData = (key: keyof RespostaCompletaItem) => {
     const counts: Record<string, number> = {};
-    if (filteredData && filteredData.length > 0) {
+    if (filteredData.length > 0) {
         filteredData.forEach(item => {
-            if (item && typeof item[key] !== 'undefined' && item[key] !== null) { // Verificação adicional
-                const value = String(item[key]); // Garante que é string
+            if (item && typeof item[key] !== 'undefined' && item[key] !== null) {
+                const value = String(item[key]);
                 counts[value] = (counts[value] || 0) + 1;
             }
         });
@@ -143,6 +151,7 @@ const HomePage: React.FC = () => {
     return transformDataForChart(counts);
   };
 
+  // Garante que os dados base para gráficos também usem os valores de appData (que já têm defaults)
   const distribuicaoIdadeData = transformDataForChart(appData.distribuicao_idade);
   const distribuicaoMunicipioData = transformDataForChart(appData.distribuicao_municipio);
   const interessesWordCloudData = transformDataForWordCloud(appData.respostas_interesses);
@@ -161,11 +170,11 @@ const HomePage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      {/* ... O restante do JSX permanece o mesmo ... */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-xl font-semibold mb-2 text-blue-600">Total de Respondentes</h3>
-          <p className="text-4xl font-bold">{appData.total_respondentes}</p>
+          {/* Garante que appData.total_respondentes existe antes de renderizar */}
+          <p className="text-4xl font-bold">{appData?.total_respondentes ?? 'N/A'}</p>
         </div>
         <div className="bg-white p-4 rounded-lg shadow">
           <label htmlFor="municipio-filter" className="block text-sm font-medium text-gray-700 mb-1">Filtrar por Município:</label>
@@ -198,7 +207,7 @@ const HomePage: React.FC = () => {
             <BarChart data={distribuicaoIdadeData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis />
+              <YAxis allowDecimals={false}/>
               <Tooltip />
               <Legend />
               <Bar dataKey="value" fill="#8884d8" name="Quantidade" />
@@ -226,7 +235,7 @@ const HomePage: React.FC = () => {
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={filteredDistribuicaoPerfilData} layout="vertical" margin={{ top: 5, right: 20, left: 120, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
-              <XAxis type="number" />
+              <XAxis type="number" allowDecimals={false}/>
               <YAxis type="category" dataKey="name" width={100} />
               <Tooltip />
               <Legend />
@@ -256,7 +265,7 @@ const HomePage: React.FC = () => {
             <BarChart data={filteredInteresseCursoData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="name" />
-              <YAxis />
+              <YAxis allowDecimals={false}/>
               <Tooltip />
               <Legend />
               <Bar dataKey="value" fill="#FFBB28" name="Quantidade" />
