@@ -242,7 +242,7 @@ const HomePage: React.FC = () => {
               <Bar dataKey="value" fill="#82ca9d" name="Quantidade" />
             </BarChart>
           </ResponsiveContainer>
-        </div>*/
+        </div>*/}
 
         <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Posse de CNH (Filtrado)</h3>
