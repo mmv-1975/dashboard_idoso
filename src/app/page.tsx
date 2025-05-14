@@ -435,7 +435,7 @@ const HomePage: React.FC = () => {
           </ResponsiveContainer>
         </div>
 
-        {interessesWordCloudData && interessesWordCloudData.length > 0 && (
+        {/*interessesWordCloudData && interessesWordCloudData.length > 0 && (
           <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2">
             <h3 className="text-xl font-semibold mb-4 text-blue-600">
               Principais Interesses (Geral)
@@ -444,9 +444,9 @@ const HomePage: React.FC = () => {
               <WordCloud words={interessesWordCloudData} options={options} />
             </ResponsiveContainer>
           </div>
-        )}
+        )*/}
 
-        {mensagensGestoresWordCloudData &&
+        {/*mensagensGestoresWordCloudData &&
           mensagensGestoresWordCloudData.length > 0 && (
             <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-3">
               <h3 className="text-xl font-semibold mb-4 text-blue-600">
@@ -459,7 +459,7 @@ const HomePage: React.FC = () => {
                 />
               </ResponsiveContainer>
             </div>
-          )}
+          )*/}
       </div>
     </DashboardLayout>
   );
