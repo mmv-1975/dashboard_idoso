@@ -170,7 +170,7 @@ const HomePage: React.FC = () => {
 
   return (
     <DashboardLayout>
-      {/*<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div className="bg-white p-6 rounded-lg shadow">
           <h3 className="text-xl font-semibold mb-2 text-blue-600">Total de Respondentes</h3>
           <p className="text-4xl font-bold">{appData?.total_respondentes ?? 'N/A'}</p>
@@ -197,7 +197,7 @@ const HomePage: React.FC = () => {
             {idadesUnicas.map(i => <option key={i} value={i}>{i}</option>)}
           </select>
         </div>
-      </div>*/}
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
@@ -214,7 +214,7 @@ const HomePage: React.FC = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
+        {/*<div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Distribuição por Município (Geral)</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -227,7 +227,7 @@ const HomePage: React.FC = () => {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </div>*/}
         
         <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Perfil dos Respondentes (Filtrado)</h3>
@@ -258,7 +258,7 @@ const HomePage: React.FC = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
+        {/*<div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Interesse em Curso de Trânsito (Filtrado)</h3>
            <ResponsiveContainer width="100%" height={300}>
             <BarChart data={filteredInteresseCursoData} margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
@@ -277,7 +277,7 @@ const HomePage: React.FC = () => {
           <ResponsiveContainer width="100%" height={300}>
             <WordCloud words={interessesWordCloudData} options={options} />
           </ResponsiveContainer>
-        </div>
+        </div>*/}
 
         {/*<div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-3">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Mensagens aos Gestores (Nuvem de Palavras - Geral)</h3>
