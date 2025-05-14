@@ -215,7 +215,7 @@ const HomePage: React.FC = () => {
           </ResponsiveContainer>
         </div>
 
-        <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
+        {/*<div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Distribuição por Município (Geral)</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -228,9 +228,9 @@ const HomePage: React.FC = () => {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>
+        </div>*/}
         
-        {/*<div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
+        <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Perfil dos Respondentes (Filtrado)</h3>
           <ResponsiveContainer width="100%" height={300}>
             <BarChart data={filteredDistribuicaoPerfilData} layout="vertical" margin={{ top: 5, right: 20, left: 120, bottom: 5 }}>
@@ -242,9 +242,9 @@ const HomePage: React.FC = () => {
               <Bar dataKey="value" fill="#82ca9d" name="Quantidade" />
             </BarChart>
           </ResponsiveContainer>
-        </div>*/}
+        </div>
 
-        {/*<div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
+        <div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Posse de CNH (Filtrado)</h3>
           <ResponsiveContainer width="100%" height={300}>
             <PieChart>
@@ -257,7 +257,7 @@ const HomePage: React.FC = () => {
               <Legend />
             </PieChart>
           </ResponsiveContainer>
-        </div>*/}
+        </div>
 
         {/*<div className="bg-white p-6 rounded-lg shadow col-span-1 md:col-span-2 lg:col-span-1">
           <h3 className="text-xl font-semibold mb-4 text-blue-600">Interesse em Curso de Trânsito (Filtrado)</h3>
